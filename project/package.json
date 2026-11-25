@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "start": "node dist/server.js",
-    "build": "vite build && esbuild src/server.ts --bundle --platform=node --format=esm --target=node18 --outfile=api/index.js --external:mysql2 --external:bcryptjs",
+    "build": "vite build && esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.js",
     "test": "jest",
     "lint": "eslint .",
     "preview": "vite preview",
