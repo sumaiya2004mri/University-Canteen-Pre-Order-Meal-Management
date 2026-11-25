@@ -20,18 +20,12 @@ import { CartProvider, useCart } from '@/context/CartContext';
 import { fetchProfile, getSession, signOut, type SessionUser } from '@/lib/auth';
 import {
   MOCK_STUDENT,
-  supabase,
   type MenuItem,
   type Order,
   type OrderStatus,
   type PickupSlot,
-  MENU_SELECT,
-  SLOT_SELECT,
-  ORDER_SELECT,
-  mapMenuItem,
-  mapSlot,
-  mapOrder,
-} from '@/lib/supabase';
+} from '@/lib/types';
+import { MENU_SELECT, SLOT_SELECT, ORDER_SELECT, mapMenuItem, mapSlot, mapOrder } from '@/lib/mappers';
 import type { AdminPage, AppNotification, Page } from '@/types';
 
 const INITIAL_NOTIFICATIONS: AppNotification[] = [];
@@ -66,6 +60,7 @@ function CampusBitesApp() {
   const { lines: cartLines, total: cartTotal, clear: clearCart } = useCart();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
+  // Auth initialization – using backend session handling.
   useEffect(() => {
     async function init() {
       const user = await getSession();
@@ -74,157 +69,62 @@ function CampusBitesApp() {
       setAuthLoading(false);
     }
     init();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      (async () => {
-        if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setStudent(null);
-          setOrders([]);
-          setMenuItems([]);
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          const user = await getSession();
-          setSession(user);
-          setStudent(user);
-        }
-      })();
-    });
-    return () => subscription.unsubscribe();
+    // No Supabase auth subscription needed.
   }, []);
 
   // ── Load menu ─────────────────────────────────────────────────────────────
+// Load menu via Express API
   const loadMenu = useCallback(async () => {
     setLoadingMenu(true);
     setMenuError(null);
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select(MENU_SELECT)
-      .order('item_id', { ascending: true });
-
-    if (error) {
-      // Fallback: schema might use different column names (old Supabase deployment)
-      const { data: fallback, error: fe } = await supabase
-        .from('menu_items')
-        .select('*')
-        .order('id', { ascending: true });
-      if (fe) {
-        setMenuError(fe.message);
-        setMenuItems([]);
-      } else {
-        // Map old-style columns
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setMenuItems((fallback ?? []).map((row: any) => ({
-          id: String(row.item_id ?? row.id),
-          name: row.item_name ?? row.name ?? '',
-          description: row.description ?? null,
-          price: Number(row.price ?? 0),
-          category: row.category ?? null,
-          category_id: row.category_id ?? null,
-          is_available: Boolean(row.is_available),
-          image_url: row.image_url ?? null,
-          stock_quantity: row.stock_qty ?? row.stock_quantity ?? null,
-          updated_at: row.updated_at ?? null,
-        })));
-      }
-    } else {
-      setMenuItems((data ?? []).map(mapMenuItem));
+    try {
+      const resp = await fetch('/api/menu');
+      if (!resp.ok) throw new Error('Failed to fetch menu');
+      const data = await resp.json();
+      setMenuItems(data.map(mapMenuItem));
+    } catch (e: any) {
+      setMenuError(e.message);
+      setMenuItems([]);
     }
     setLoadingMenu(false);
   }, []);
 
-  // ── Load orders, items, slots ─────────────────────────────────────────────
+  // Load orders, items, slots via Express API
   const loadOrders = useCallback(async () => {
     setLoadingOrders(true);
     setOrdersError(null);
     try {
-      const [ordersRes, itemsRes, slotsRes] = await Promise.all([
-        supabase
-          .from('orders')
-          .select(ORDER_SELECT)
-          .order('order_date', { ascending: false }),
-        supabase
-          .from('order_items')
-          .select('order_item_id, order_id, item_id, quantity, unit_price, menu_items(item_name)'),
-        supabase
-          .from('pickup_slots')
-          .select(SLOT_SELECT)
-          .order('slot_date', { ascending: true })
-          .order('start_time', { ascending: true }),
-      ]);
-
-      if (ordersRes.error) {
-        // Fallback: try old column names
-        const { data: fallbackOrders, error: foe } = await supabase
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (foe) throw foe;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mapped = (fallbackOrders ?? []).map((row: any) => ({
-          id: String(row.order_id ?? row.id),
-          user_id: row.user_id ? String(row.user_id) : null,
-          pickup_slot_id: row.slot_id != null ? String(row.slot_id) : (row.pickup_slot_id ?? null),
-          order_status: (row.order_status ?? 'Pending') as OrderStatus,
-          total_amount: row.total_amount != null ? Number(row.total_amount) : null,
-          created_at: row.order_date ?? row.created_at ?? new Date().toISOString(),
-          cancelled_at: row.cancelled_at ?? null,
-          notes: row.notes ?? null,
-        }));
-        setOrders(mapped.map((o) => ({ ...o, items: [] })));
-      } else {
-        const rawOrders = (ordersRes.data ?? []).map(mapOrder);
-
-        // Parse items
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const allItems: OrderItemRow[] = (itemsRes.data ?? []).map((row: any) => ({
-          order_item_id: String(row.order_item_id ?? row.id),
-          order_id: row.order_id,
-          quantity: row.quantity ?? 0,
-          unit_price: row.unit_price ?? row.price ?? null,
-          menu_items: row.menu_items
-            ? { item_name: row.menu_items.item_name ?? row.menu_items.name ?? 'Unknown' }
-            : null,
-        }));
-
-        setOrders(
-          rawOrders.map((o) => ({
-            ...o,
-            items: allItems
-              .filter((it) => String(it.order_id) === o.id)
-              .map((it) => ({
-                name: it.menu_items?.item_name ?? 'Unknown item',
-                quantity: it.quantity ?? 0,
-              })),
-          })),
-        );
+      const resp = await fetch('/api/orders');
+      if (!resp.ok) throw new Error('Failed to fetch orders');
+      const { orders, items, slots } = await resp.json();
+      // Map orders
+      const rawOrders = (orders ?? []).map(mapOrder);
+      // Parse items
+      const allItems = (items ?? []).map((row: any) => ({
+        order_item_id: String(row.order_item_id ?? row.id),
+        order_id: row.order_id,
+        quantity: row.quantity ?? 0,
+        unit_price: row.unit_price ?? row.price ?? null,
+        menu_items: row.menu_items
+          ? { item_name: row.menu_items.item_name ?? row.menu_items.name ?? 'Unknown' }
+          : null,
+      }));
+      setOrders(
+        rawOrders.map((o) => ({
+          ...o,
+          items: allItems
+            .filter((it) => String(it.order_id) === o.id)
+            .map((it) => ({ name: it.menu_items?.item_name ?? 'Unknown item', quantity: it.quantity ?? 0 })),
+        }))
+      );
+      // Set slots
+      if (Array.isArray(slots)) {
+        setSlots(slots.map(mapSlot));
       }
-
-      if (!slotsRes.error && slotsRes.data) {
-        setSlots(slotsRes.data.map(mapSlot));
-      } else {
-        // Fallback: old slot schema
-        const { data: fallbackSlots } = await supabase
-          .from('pickup_slots')
-          .select('*')
-          .order('slot_time', { ascending: true });
-        if (fallbackSlots) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setSlots((fallbackSlots as any[]).map((s: any) => ({
-            id: String(s.slot_id ?? s.id),
-            slot_time: s.slot_time ?? `${s.slot_date}T${s.start_time}`,
-            slot_date: s.slot_date ?? '',
-            start_time: s.start_time ?? '',
-            end_time: s.end_time ?? '',
-            max_orders: s.max_orders ?? null,
-            is_active: Boolean(s.is_active),
-          })));
-        }
-      }
-    } catch (e) {
-      setOrdersError(e instanceof Error ? e.message : 'Failed to load orders.');
+    } catch (e: any) {
+      setOrdersError(e.message);
       setOrders([]);
+      setSlots([]);
     } finally {
       setLoadingOrders(false);
     }

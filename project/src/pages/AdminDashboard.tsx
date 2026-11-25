@@ -9,7 +9,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Card, EmptyState, SectionTitle, StatusBadge, orderTotal } from '@/components/ui';
-import { formatBDT, type MenuItem, type Order, type PickupSlot } from '@/lib/supabase';
+import { formatBDT, type MenuItem, type Order, type PickupSlot } from '@/lib/types';
 
 export type AdminOrder = Order & { items: { id: string; name: string; quantity: number }[] };
 

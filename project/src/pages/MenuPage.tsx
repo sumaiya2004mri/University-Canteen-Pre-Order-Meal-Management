@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import FoodCard from '@/components/FoodCard';
 import { EmptyState, SearchInput, useCategoryFilter } from '@/components/ui';
-import type { MenuItem } from '@/lib/supabase';
+import type { MenuItem } from '@/lib/types';
 
 type Props = {
   items: MenuItem[];

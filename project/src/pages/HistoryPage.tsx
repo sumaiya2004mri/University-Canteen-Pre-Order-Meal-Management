@@ -1,5 +1,5 @@
 import { Card, EmptyState, SectionTitle, StatusBadge, orderTotal } from '@/components/ui';
-import { formatBDT } from '@/lib/supabase';
+import { formatBDT } from '@/lib/types';
 import type { OrderWithItems } from '@/pages/OrdersTablePage';
 
 type Props = {

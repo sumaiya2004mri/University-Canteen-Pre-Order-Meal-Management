@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { XCircle } from 'lucide-react';
 import { Card, EmptyState, SearchInput, SectionTitle, StatusBadge, orderTotal } from '@/components/ui';
-import type { Order, OrderStatus } from '@/lib/supabase';
+import type { Order, OrderStatus } from '@/lib/types';
 import type { Page } from '@/types';
 
 export type OrderWithItems = Order & { items: { id?: string; name: string; quantity: number }[] };

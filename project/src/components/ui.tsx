@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Search, X } from 'lucide-react';
-import { formatBDT, type MenuItem, type Order, type OrderStatus } from '@/lib/supabase';
+import { formatBDT, type MenuItem, type Order, type OrderStatus } from '@/lib/types';
 
 export const STATUS_STYLES: Record<OrderStatus, string> = {
   'Pending': 'bg-amber-50 text-amber-800 border-amber-200',

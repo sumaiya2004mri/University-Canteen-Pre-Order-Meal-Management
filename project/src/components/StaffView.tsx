@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChefHat, Clock, RefreshCw, User } from 'lucide-react';
-import { supabase, type OrderStatus, type PickupSlot, formatBDT, mapOrder, mapSlot, ORDER_SELECT, SLOT_SELECT } from '@/lib/supabase';
+import { formatBDT, type OrderStatus, type PickupSlot } from '@/lib/types';
+import { mapOrder, mapSlot } from '@/lib/mappers';
 import { Card, SearchInput } from '@/components/ui';
 
 const STATUS_OPTIONS: OrderStatus[] = ['Pending', 'Preparing', 'Ready for Pickup', 'Completed'];

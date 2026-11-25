@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Clock, Minus, Plus, Trash2 } from 'lucide-react';
 import { Card, EmptyState, SectionTitle } from '@/components/ui';
-import { formatBDT, type PickupSlot } from '@/lib/supabase';
+import { formatBDT, type PickupSlot } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import type { Page } from '@/types';
 

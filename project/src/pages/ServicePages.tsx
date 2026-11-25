@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LifeBuoy, MessageCircle, Phone } from 'lucide-react';
 import { Card, SectionTitle, StudentInfoRow } from '@/components/ui';
-import type { StudentProfile } from '@/lib/supabase';
+import type { StudentProfile } from '@/lib/types';
 
 export function HelpPage() {
   const faqs = [

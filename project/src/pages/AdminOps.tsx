@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { Card, EmptyState, SearchInput, SectionTitle, StatusBadge, orderTotal } from '@/components/ui';
-import { formatBDT, type MenuItem, type OrderStatus } from '@/lib/supabase';
+import { formatBDT, type MenuItem, type OrderStatus } from '@/lib/types';
 import type { AdminOrder } from '@/pages/AdminDashboard';
 
 export type AdminMenuItem = MenuItem & { stock_quantity?: number | null; created_at?: string | null };

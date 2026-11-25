@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { MenuItem } from '@/lib/supabase';
+import type { MenuItem } from '@/lib/types';
 
 export type CartLine = { item: MenuItem; quantity: number };
 

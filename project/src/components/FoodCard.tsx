@@ -1,5 +1,5 @@
 import { Clock, Plus } from 'lucide-react';
-import { formatBDT, type MenuItem } from '@/lib/supabase';
+import { formatBDT, type MenuItem } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 
 const CATEGORY_EMOJI: Record<string, string> = {

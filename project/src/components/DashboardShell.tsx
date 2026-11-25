@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Avatar } from '@/components/ui';
 import type { Page } from '@/types';
-import type { StudentProfile } from '@/lib/supabase';
+import type { StudentProfile } from '@/lib/types';
 
 type NavItem = { id: Page; label: string; icon: typeof Home };
 type NavSection = { label: string; items: NavItem[] };

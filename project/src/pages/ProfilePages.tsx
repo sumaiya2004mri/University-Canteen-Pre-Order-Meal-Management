@@ -1,7 +1,7 @@
 import { Card, SectionTitle, StudentInfoRow } from '@/components/ui';
 import { Avatar } from '@/components/ui';
 import { Mail, Phone } from 'lucide-react';
-import type { StudentProfile } from '@/lib/supabase';
+import type { StudentProfile } from '@/lib/types';
 
 export function ProfilePage({ student }: { student: StudentProfile }) {
   return (

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import FoodCard from '@/components/FoodCard';
 import { Avatar, Card, EmptyState, SectionTitle, StatusBadge, orderTotal } from '@/components/ui';
-import { formatBDT, type MenuItem, type Order, type StudentProfile } from '@/lib/supabase';
+import { formatBDT, type MenuItem, type Order, type StudentProfile } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import type { AppNotification, Page } from '@/types';
 

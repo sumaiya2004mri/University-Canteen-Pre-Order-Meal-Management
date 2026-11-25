@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { Card, EmptyState, SearchInput, SectionTitle } from '@/components/ui';
-import { formatBDT, type MenuItem, type PickupSlot } from '@/lib/supabase';
+import { formatBDT, type MenuItem, type PickupSlot } from '@/lib/types';
 
 export type AdminMenuItem = MenuItem & { stock_quantity?: number | null; updated_at?: string | null };
 
