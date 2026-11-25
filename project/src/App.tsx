@@ -703,7 +703,17 @@ function CampusBitesApp() {
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
   if (!session) {
-    return <AuthPage onSignedIn={() => { /* onAuthStateChange picks up the session */ }} />;
+    return (
+      <AuthPage
+        onSignedIn={(u?: SessionUser) => {
+          const user = u || JSON.parse(localStorage.getItem('campusbites_user') || 'null');
+          if (user) {
+            setSession(user);
+            setStudent(user);
+          }
+        }}
+      />
+    );
   }
 
   // ── Student portal ─────────────────────────────────────────────────────────

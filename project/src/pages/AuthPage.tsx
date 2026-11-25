@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChefHat, GraduationCap, Lock, Mail, UtensilsCrossed, UserPlus } from 'lucide-react';
-import { signIn, signUp } from '@/lib/auth';
+import { signIn, signUp, type SessionUser } from '@/lib/auth';
 import { Card } from '@/components/ui';
 
 type Mode = 'signin' | 'signup';
@@ -14,7 +14,7 @@ const DEPARTMENTS = [
   'Law',
 ];
 
-export default function AuthPage({ onSignedIn }: { onSignedIn: () => void }) {
+export default function AuthPage({ onSignedIn }: { onSignedIn: (user?: SessionUser) => void }) {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,14 +36,14 @@ export default function AuthPage({ onSignedIn }: { onSignedIn: () => void }) {
         if (err) {
           setError(err);
         } else if (user) {
-          onSignedIn();
+          onSignedIn(user);
         }
       } else {
         if (password.length < 6) {
           setError('Password must be at least 6 characters.');
           return;
         }
-        const { error: err, needsEmailConfirm } = await signUp({
+        const { user, error: err } = await signUp({
           name,
           studentId,
           email,
@@ -52,8 +52,8 @@ export default function AuthPage({ onSignedIn }: { onSignedIn: () => void }) {
         });
         if (err) {
           setError(err);
-        } else if (needsEmailConfirm) {
-          setInfo('Account created. Check your university email to confirm your address, then sign in.');
+        } else if (user) {
+          onSignedIn(user);
         } else {
           onSignedIn();
         }

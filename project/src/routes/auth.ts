@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { signUp, signIn, getSession, signOut, fetchProfile } from '../lib/serverAuth';
-import type { SessionUser } from '@/lib/serverAuth';
 
 const router = Router();
 
@@ -11,7 +10,7 @@ router.post('/signup', async (req: Request, res: Response) => {
   if (result.error) {
     return res.status(400).json({ error: result.error });
   }
-  return res.status(201).json({ needsEmailConfirm: result.needsEmailConfirm });
+  return res.status(201).json({ user: result.user, needsEmailConfirm: false });
 });
 
 // POST /api/auth/signin
@@ -21,7 +20,6 @@ router.post('/signin', async (req: Request, res: Response) => {
   if (result.error) {
     return res.status(400).json({ error: result.error });
   }
-  // In a real app set a session cookie here; for now just return the user.
   return res.json({ user: result.user });
 });
 
